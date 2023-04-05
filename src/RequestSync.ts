@@ -1,6 +1,19 @@
 import MIMEType from "whatwg-mimetype";
 import BodySyncMixin, { body, mimeType } from "./BodySyncMixin.ts";
 
+function headerExtractMIMEType(this: RequestSync) {
+  if (this.headers.has("Content-Type")) {
+    const contentType = this.headers.get("Content-Type")!;
+    const mimeType = new MIMEType(contentType);
+    return mimeType;
+  } else if (this.headers.get("X-Content-Type-Options") === "nosniff") {
+    return new MIMEType("application/octet-stream");
+  } else {
+    // TODO: Support MIME sniffing?
+    return new MIMEType("application/octet-stream");
+  }
+}
+
 //
 class RequestSync implements BodySyncMixin {
   #url: string;
@@ -23,17 +36,6 @@ class RequestSync implements BodySyncMixin {
   }
 }
 includesMixin.call(Request, BodySyncMixin);
-mimeType.set(Request, function (this: RequestSync) {
-  if (this.headers.has("Content-Type")) {
-    const contentType = this.headers.get("Content-Type")!;
-    const mimeType = new MIMEType(contentType);
-    return mimeType;
-  } else if (this.headers.get("X-Content-Type-Options") === "nosniff") {
-    return new MIMEType("application/octet-stream");
-  } else {
-    // TODO: Support MIME sniffing?
-    return new MIMEType("application/octet-stream");
-  }
-});
+mimeType.set(Request);
 
 export default RequestSync;
