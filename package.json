@@ -22,7 +22,7 @@
     "./internal/*": null
   },
   "scripts": {
-    "build-docs": "typedoc && npm pack -w docs/playground",
+    "build-docs": "typedoc",
     "prepack": "vite build",
     "start": "vitest",
     "pretest": "prettier -w --ignore-path .gitignore .",
