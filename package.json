@@ -1,36 +1,18 @@
 {
   "name": "@jcbhmr/fetch-sync",
-  "description": "⌚ Synchronous version of fetch() for web workers and Node.js",
-  "license": "MIT",
   "version": "1.0.0",
-  "scripts": {
-    "prepack": "vite build",
-    "pretest": "prettier -w --ignore-path .gitignore .",
-    "test": "tsc --noEmit && vitest run",
-    "start": "vitest",
-    "build-docs": "typedoc && npm pack -w docs/playground"
-  },
-  "dependencies": {
-    "synckit": "latest",
-    "undici": "latest"
-  },
-  "devDependencies": {
-    "vite": "latest",
-    "vite-plugin-dts": "latest",
-    "vite-plugin-no-bundle": "latest",
-    "vitest": "latest",
-    "typescript": "latest",
-    "prettier": "latest",
-    "prettier-plugin-packagejson": "latest",
-    "prettier-plugin-jsdoc": "latest",
-    "typedoc": "latest"
-  },
+  "description": "⌚ Synchronous version of fetch() for web workers and Node.js",
+  "keywords": [
+    "fetch",
+    "sync",
+    "synchronous"
+  ],
+  "homepage": "https://jcbhmr.github.io/fetch-sync",
+  "license": "MIT",
   "contributors": [
     "Jacob Hummer <jcbhmr@outlook.com> (https://jcbhmr.me/)",
     "Lars Willighagen"
   ],
-  "keywords": ["fetch", "sync", "synchronous"],
-  "homepage": "https://jcbhmr.github.io/fetch-sync",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -38,5 +20,27 @@
     },
     "./*.js": "./dist/*.js",
     "./internal/*": null
+  },
+  "scripts": {
+    "build-docs": "typedoc && npm pack -w docs/playground",
+    "prepack": "vite build",
+    "start": "vitest",
+    "pretest": "prettier -w --ignore-path .gitignore .",
+    "test": "tsc --noEmit && vitest run"
+  },
+  "dependencies": {
+    "synckit": "latest",
+    "undici": "latest"
+  },
+  "devDependencies": {
+    "prettier": "latest",
+    "prettier-plugin-jsdoc": "latest",
+    "prettier-plugin-packagejson": "latest",
+    "typedoc": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vite-plugin-dts": "latest",
+    "vite-plugin-no-bundle": "latest",
+    "vitest": "latest"
   }
 }
