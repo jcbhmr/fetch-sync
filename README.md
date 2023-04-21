@@ -1,15 +1,19 @@
 # Synchronous `fetch()`
 
-⏱ Synchronous wrapper around the `fetch()` API
+⏱ Synchronous wrapper around the [`fetch()`] API
 
 <div align="center">
 
+![](https://user-images.githubusercontent.com/61068799/233521706-1486b693-2275-4255-ae4d-50ae00abcc86.png)
+
 </div>
 
-🖥️ Works in Node.js using subprocess RPC \
+🖥️ Works in Node.js and the browser \
 👨‍🏭 Works great in web `Worker` threads! \
 ⚛️ Perfect for WebAssembly \
 💻 Works in the browser using [`XMLHttpRequest`]
+
+⚠️ If possible, prefer the native async `fetch()` API. This is a niche package.
 
 ## Installation
 
@@ -27,95 +31,85 @@ import {} from "https://esm.sh/@jcbhmr/fetch-sync";
 
 ## Usage
 
-⚠️ It is **not recommended** to use this in a browser on the main UI thread!
-`fetchSync()` is great for `Worker` threads, but you don't want to block your user's click events in the UI.
+🛑 It is **not recommended** to use this in a browser on the main UI thread!
+`fetchSync()` is great for `Worker` threads, but you don't want to block your
+user's click events in the UI.
 
-The API of this package is almost identical to the regular `fetch()` API. The only differences are the `.json()` and friends getters and the `fetch()` function itself. These functions will all return the raw value instead of a `Promise` instance.
+The API surface is mostly a mirror of the Fetch Standard, just with non-async
+things in-place of normally async operations:
+
+1. All `Promise<T>`-returning functions (`.text()`, `.json()`, `.blob()`, etc.)
+   are replaced with synchronous versions. These all return the values
+   _immediately_.
+2. The `.body` value has been replaced with an `IterableIterator<Uint8Array>`
+   instead of the normal `ReadableStream<Uint8Array>`. We use this instead of an
+   `Array` to better parallel the `ReadableStream`'s interface style. Use
+   `.next()` or a for-of loop to read it chunk-by-chunk.
 
 ```js
 import { fetchSync, RequestSync, ResponseSync } from "@jcbhmr/fetch-sync";
 
-// Note the lack of async/await!
-const response = fetchSync("https://jsonplaceholder.typicode.com/todos/1");
-const json = response.json();
-console.log(json);
-//=> { "userId": 1, "id": 1, "title": "delectus aut autem", "completed": false }
+const requestSync = new RequestSync("https://httpbin.org/post", {
+  method: "POST",
+  headers: {
+    "Content-Type": "text/plain",
+  },
+  body: "Hello world!",
+});
 
-const text = fetchSync("https://api.ipify.org/").text();
-console.log(text);
-//=> '100.100.100.100'
+const responseSync = fetchSync(requestSync);
+console.log(responseSync.status);
+//=> 200
+console.log(responseSync.bodyUsed);
+//=> false
+
+// Remember! This is an IterableIterator<Uint8Array> now.
+const chunks = [...responseSync.body];
+console.log(chunks);
+//=> [ Uint8Array [ ... ], Uint8Array [ ... ] ]
+
+console.log(responseSync.bodyUsed);
+//=> true
 ```
 
-Here's an example of using C ➡️ WASM and `fetchSync()` to make a basic `GET()`
-function.
+### Limitations
 
-```c
-void println(char* messagePointer, int messageLength);
-char* GET(char* urlPointer, int urlLength, char* bodyTarget);
+Due to the fact that the API surface must be almost completely synchronous,
+there are a few things that are supported by the normal native `fetch()`
+function that we cannot support. Those are:
 
-int main() {
-  char urlPointer[] = "https://example.org/";
-  int urlLength = sizeof(url);
-  println(urlPointer, urlLength);
+- `ReadableStream` instances as `body` parameters. There's no easy way to read
+  them synchronously.
+- `Blob` instances as `body` parameters. Same as `ReadableStream`, their async
+  nature makes them impossible to reconcile with this.
+- Proprietary Node.js-specific options to the `fetchSync()` function. Things
+  like Node Fetch's `agent` property are not implemented here.
+- `AbortSignal` instances for cancellation. Even `XMLHttpRequest` doesn't let
+  you set a `timeout` for synchronous requests. Any provided `AbortSignal` will
+  throw an error only if it has already been aborted. They don't work to cancel
+  mid-flight requests since there's no way you would even _be able_ to
+  `.abort()` one while the thread is blocked.
+- The `.formData()` function to get a parsed `FormData` object. This isn't
+  implemented yet.
+- Proper binary responses in the main thread in the browser. When using
+  synchronous XHR, we cannt set the `.responseType` option to `"arraybuffer"`,
+  so we have to derive the bytes from the default text-based response using
+  `TextEncoder`. This **may not be 100% accurate**.
+- `RequestSync` and `ResponseSync` are **not interoperable** with the native
+  `Request` and `Response` classes. They are two completely separate "chains"
+  with independant backing APIs.
 
-  char* bodyPointer;
-  int bodyLength = GET(urlPointer, urlLength, bodyPointer);
-  println(bodyPointer, bodyLength);
-}
-```
+These limitations are unlikely to be a problem for most users. If you're really
+interested in what options the `RequestSync` and `ResponseSync` classes support
+for options, you can check the (relatively) simple implementation files to see
+how they work. More developer information can be found on [the dev wiki].
 
-💡 You can compile this C code to WASM using [WasmFiddle]. Just make sure you
-download the `.wasm` file, not the `.wat` file!
-
-```js
-function GET(urlPointer, urlLength, bodyPointer) {
-  const urlBytes = new Uint8Array(memory, urlPointer, urlLength);
-  const url = new TextDecoder().decode(urlBytes);
-
-  // 🎉 Look at this cool SYNCHRONOUS network activity!
-  const response = fetchSync(url);
-  const body = response.arrayBuffer();
-
-  const bodyBytes = new Uint8Array(body);
-  memoryBytes.set(bodyBytes, 1000);
-
-  return bodyBytes.byteLength;
-}
-
-function println(messagePointer, messageLength) {
-  const messageBytes = new Uint8Array(memory, messagePointer, messageLength);
-  const message = new TextDecoder().decode(messageBytes);
-
-  console.log(message);
-}
-
-const imports = {
-  env: { GET, println }
-};
-const { instance } = WebAssembly.instantiateStreaming(fetch("example.wasm"), imports);
-const { main, memory } = instance.exports
-const memoryBytes = new Uint8Array(memory.buffer);
-main();
-```
-
-[WasmFiddle]: https://wasdk.github.io/WasmFiddle/
-
-
-## Limitations
-
-### Node.js
-
-  - Does not support `Stream`s (or `FormData`) as input bodies since they cannot be read or serialized synchronously
-  - Does not support `Blob`s as input bodies since they're too complex
-  - Does not support the non-spec `agent` option as its value cannot be serialized
-
-### Browser
-
-  - Does not support most options, since `XMLHttpRequest` is pretty limited. Supported are:
-    - `method`
-    - `body`
-    - `headers`
-    - `credentials` (but not `omit`)
-    - (Non-spec) `timeout`
-  - Does not support [binary responses in the main thread](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType#Synchronous_XHR_restrictions)
-  - CORS limitations apply, of course (note they may be stricter for synchronous requests)
+<!-- prettier-ignore-start -->
+[the dev wiki]: https://github.com/jcbhmr/fetch-sync/wiki
+[`fetch()`]: https://developer.mozilla.org/en-US/docs/Web/API/fetch
+[`xmlhttprequest`]: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+[esm>cdn]: https://esm.sh/
+[jsdelivr]: https://www.jsdelivr.com/esm
+[vite]: https://vitejs.dev/
+[webpack]: https://webpack.js.org/
+<!-- prettier-ignore-end -->
