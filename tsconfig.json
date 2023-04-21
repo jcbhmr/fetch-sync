@@ -7,7 +7,8 @@
     "module": "ESNext",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "moduleResolution": "bundler"
   },
   "include": ["src", "test", "vite.config.ts"],
   "exclude": ["node_modules", "dist"],
