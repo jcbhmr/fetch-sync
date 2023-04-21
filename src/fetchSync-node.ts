@@ -1,5 +1,5 @@
-import RequestSync from "../RequestSync.ts";
-import ResponseSync from "../ResponseSync.ts";
+import RequestSync from "./RequestSync.ts";
+import ResponseSync from "./ResponseSync.ts";
 import { createSyncFn } from "synckit";
 
 function fetchSync(input: RequestInfo, init: RequestInit = {}): ResponseSync {
