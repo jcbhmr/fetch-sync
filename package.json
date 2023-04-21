@@ -29,18 +29,20 @@
     "test": "tsc --noEmit && vitest run"
   },
   "dependencies": {
-    "synckit": "latest",
-    "undici": "latest"
+    "synckit": "^0.8.5",
+    "undici": "^5.22.0",
+    "whatwg-mimetype": "^3.0.0"
   },
   "devDependencies": {
-    "prettier": "latest",
-    "prettier-plugin-jsdoc": "latest",
-    "prettier-plugin-packagejson": "latest",
-    "typedoc": "latest",
-    "typescript": "latest",
-    "vite": "latest",
-    "vite-plugin-dts": "latest",
-    "vite-plugin-no-bundle": "latest",
-    "vitest": "latest"
+    "@types/whatwg-mimetype": "^3.0.0",
+    "prettier": "^2.8.7",
+    "prettier-plugin-jsdoc": "^0.4.2",
+    "prettier-plugin-packagejson": "^2.4.3",
+    "typedoc": "^0.24.4",
+    "typescript": "^5.0.4",
+    "vite": "^4.3.1",
+    "vite-plugin-dts": "^2.3.0",
+    "vite-plugin-no-bundle": "^2.0.2",
+    "vitest": "^0.30.1"
   }
 }
