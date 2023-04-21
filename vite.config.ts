@@ -1,12 +1,15 @@
 import { defineConfig } from "vite";
+import dts from "vite-plugin-dts";
+import noBundle from "vite-plugin-no-bundle";
 
-const config = defineConfig({
+export default defineConfig({
   build: {
+    ssr: true,
     lib: {
-      entry: ["src/index.node.ts", "src/index.browser.ts"],
+      entry: ["src/index.ts"],
       formats: ["es"],
+      fileName: "index",
     },
   },
+  plugins: [/* dts(), */ noBundle()],
 });
-
-export default config;
