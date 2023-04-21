@@ -8,7 +8,7 @@ to delegating to a worker thread. We use [synckit] to stringify an `async`
 function and run it in a Node.js `Worker` thread and use `SharedArrayBuffer` to
 signal that the function has completed.
 
-## Spec compliance
+## Relation to the Fetch Standard
 
 This package tries to emulate the WHATWG [Fetch Standard], but to replace all
 instances if `Promise<T>` with `T` instead. That means things like `.text()` are
