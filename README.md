@@ -1,3 +1,5 @@
+![🚧 Under construction 👷‍♂️](https://i.imgur.com/LEP2R3N.png)
+
 # Synchronous `fetch()`
 
 ⏱ Synchronous wrapper around the [`fetch()`] API
