@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "synckit": "^0.8.5",
-    "undici": "^5.22.0",
+    "undici": "^5.26.2",
     "whatwg-mimetype": "^3.0.0"
   },
   "devDependencies": {
